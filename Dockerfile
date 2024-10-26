@@ -1,20 +1,32 @@
-FROM node:20-alpine3.18 AS base
-
-FROM base AS development
+FROM node:20 AS development
 
 WORKDIR /app
-COPY package*.json ./
+
+COPY package.json package-lock.json ./
+
 RUN npm install
+
 COPY . .
-EXPOSE 5173
+
+EXPOSE 8080
+
 CMD ["npm", "run", "dev"]
 
-FROM base AS production
+
+FROM node:20-alpine AS production
 
 WORKDIR /app
-COPY package*.json ./
+
+COPY package*.json .
+
 RUN npm install
-# RUN npm install --only=production
+
+RUN npm i -g serve
+
 COPY . .
-EXPOSE 5173
-CMD ["npm", "run", "dev"]
+
+RUN npm run build
+
+EXPOSE 3000
+
+CMD [ "serve", "-s", "dist" ]
